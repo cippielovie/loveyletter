@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Love Letter - Teddy & Envelope Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* PENGATURAN DASAR */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif; font-style: normal;
+            background-color: #241d1b; /* Warna latar utama saat surat dibaca */
+            color: #3b2f2f;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; position: relative;
+        }
+
+        h1 {
+            font-family: 'Lora', serif; font-weight: 700; font-style: normal;
+            font-size: 2.2em; text-align: center; color: #4a3320;
+            border-bottom: 3px dotted rgba(74, 51, 32, 0.3);
+            padding-bottom: 10px; margin-bottom: 20px;
+        }
+
+        p { 
+            font-size: 1.15em; line-height: 1.8; text-align: justify; 
+            font-style: normal; font-weight: 600; color: #403028;
+        }
+
+        /* CONTAINER AMPLOP AWAL DENGAN BACKGROUND WILDFLOWER */
+        .envelope-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('https://img.magnific.com/free-vector/flat-design-wildflower-heart-background_23-2150534247.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover; background-position: center;
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            transition: opacity 1s ease;
+        }
+        .envelope-container.hidden {
+            opacity: 0; visibility: hidden; pointer-events: none;
+        }
+
+        .envelope {
+            position: relative; width: 320px; height: 200px;
+            background: #dcbfa0; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            perspective: 1000px;
+            transition: transform 1.5s ease, left 1.5s ease-in-out;
+            left: 0;
+        }
+        
+        .envelope.pushed-away {
+            left: 100vw; /* Efek amplop didorong keluar layar */
+            transform: rotate(10deg);
+        }
+
+        .envelope-paper {
+            position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            background: #fff; z-index: 2;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 20px;
+            font-family: 'Lora', serif; color: #8b2222; font-weight: 700;
+            transition: transform 1s ease 0.5s;
+        }
+
+        .envelope-front {
+            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid #d1b18e;
+            border-right: 160px solid #d1b18e;
+            border-bottom: 100px solid #c8a786;
+            border-top: 100px solid transparent;
+            z-index: 3; pointer-events: none;
+        }
+
+        .envelope-flap {
+            position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 110px solid #e5cdb1; 
+            border-bottom: 0;
+            transform-origin: top; z-index: 4;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* SEGEL TOMBOL "OPEN" */
+        .envelope-seal {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75px; height: 75px;
+            background-color: #8b2222; 
+            border-radius: 50%; z-index: 5;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
+            color: #f5eedc; font-weight: 700; font-family: 'Lora', serif; font-size: 1.2em;
+            transition: 0.3s; border: 2px solid #a32a2a;
+        }
+        .envelope-seal:hover { background-color: #a32a2a; transform: translate(-50%, -50%) scale(1.1); }
+        
+        .envelope.open .envelope-flap { transform: rotateX(180deg); z-index: 1; }
+        .envelope.open .envelope-seal { opacity: 0; visibility: hidden; }
+        .envelope.open .envelope-paper { transform: translateY(-40px); }
+
+        /* ANIMASI BERUANG MENDORONG AWAL */
+        #push-bear {
+            position: absolute; left: -350px; bottom: 35%;
+            width: 250px; z-index: 10000;
+            transition: left 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        #push-bear.pushing { left: 120vw; } /* Beruang jalan ke kanan */
+
+        /* TOMBOL LOVE & EFEK HUJAN LOVE */
+        .love-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: #d65c5c; color: white;
+            border: none; border-radius: 50%;
+            width: 60px; height: 60px; font-size: 1.8em;
+            cursor: pointer; z-index: 1000;
+            box-shadow: 0 5px 15px rgba(214, 92, 92, 0.4);
+            animation: pulse 2s infinite; transition: transform 0.2s;
+        }
+        .love-btn:hover { transform: scale(1.1); }
+        .love-btn:active { transform: scale(0.9); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(214, 92, 92, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(214, 92, 92, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(214, 92, 92, 0); }
+        }
+
+        #heart-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 900;
+        }
+        .floating-heart {
+            position: absolute; bottom: -50px;
+            animation: floatUp ease-in forwards; opacity: 1;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+        }
+
+        /* CONTAINER BUKU KUNO */
+        .book-wrapper {
+            position: relative; width: 95%; max-width: 850px; height: 85vh;
+            opacity: 0; visibility: hidden; transition: opacity 1.5s ease;
+        }
+        .book-wrapper.visible { opacity: 1; visibility: visible; }
+
+        /* KERTAS VINTAGE ALA PINTEREST (Kraft/Journal Paper) */
+        .page {
+            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 70px);
+            padding: 50px; box-sizing: border-box; border-radius: 8px;
+            
+            /* Kombinasi warna krem, garis samar, dan noise vintage */
+            background-color: #f4ecd8;
+            background-image: 
+                linear-gradient(transparent 96%, rgba(139, 115, 85, 0.15) 96%), /* Garis buku */
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            background-size: 100% 32px, auto;
+            
+            /* Efek kertas terbakar/lusuh di pinggir */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 70px rgba(139, 101, 60, 0.25);
+            border: 1px solid rgba(139, 115, 85, 0.3);
+            
+            opacity: 0; visibility: hidden;
+            transform: translateY(80px) scale(0.9); transform-origin: center bottom;
+            transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+        }
+        .page.active {
+            opacity: 1; visibility: visible;
+            transform: translateY(0) scale(1); z-index: 10;
+        }
+
+        /* ORNAMEN (Scribble, Tape) */
+        .tape {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg);
+            width: 140px; height: 35px; background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15); z-index: 5;
+        }
+        .scribble { position: absolute; border: 3px solid; opacity: 0.2; font-weight: bold; color: #5c4330; }
+
+        /* FOTO POLAROID LUSUH */
+        .polaroid {
+            background: #fdfbf7; padding: 15px 15px 50px 15px;
+            width: fit-content; margin: 30px auto;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.3);
+            transform: rotate(3deg); position: relative;
+        }
+        .polaroid img { max-width: 100%; max-height: 250px; filter: sepia(0.3) contrast(1.1); }
+        .polaroid-tape {
+            position: absolute; top: -15px; left: -15px; width: 90px; height: 30px;
+            background: rgba(210, 200, 180, 0.85); transform: rotate(-20deg);
+        }
+
+        /* EFEK PESAWAT TERBANG */
+        #airplane {
+            position: fixed; bottom: 10%; left: -150px;
+            font-size: 3.5em; z-index: 50; opacity: 0; pointer-events: none;
+            filter: drop-shadow(5px 10px 5px rgba(0,0,0,0.4));
+        }
+        .fly-animation { animation: flyAcross 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        
+        @keyframes flyAcross {
+            0% { left: -100px; bottom: 10%; transform: rotate(15deg) scale(0.6); opacity: 1; }
+            40% { bottom: 60%; transform: rotate(0deg) scale(1.2); }
+            100% { left: 110vw; bottom: 90%; transform: rotate(-20deg) scale(0.8); opacity: 1; }
+        }
+
+        /* BERUANG NGINTIP DI SUDUT KERTAS */
+        #peek-bear {
+            position: fixed; bottom: -150px; right: 30px;
+            width: 130px; z-index: 60; pointer-events: none;
+            transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #peek-bear.show { bottom: 10px; } /* Beruang muncul */
+
+        /* TOMBOL NAVIGASI BAWAH (AMPLOP) */
+        .controls {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; padding: 15px 25px;
+        }
+        button.nav-btn {
+            background-color: #423028; color: #f5eedc; border: none;
+            padding: 10px 20px; font-size: 1.3em; font-weight: 700;
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button.nav-btn:hover { background-color: #634739; transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.3); }
+        button.nav-btn:disabled { background-color: #888; cursor: not-allowed; transform: none; opacity: 0.5; box-shadow: none; }
+
+        @media (max-width: 600px) {
+            .page { padding: 30px 20px; }
+            h1 { font-size: 1.8em; } p { font-size: 1.05em; }
+            .love-btn { width: 50px; height: 50px; font-size: 1.5em; top: 10px; right: 10px; }
+            button.nav-btn { font-size: 1.1em; padding: 8px 15px; }
+            #push-bear { width: 180px; }
+        }
+        /* WIDGET ALA SPOTIFY */
+.spotify-widget {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #121212;
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000; /* Memastikan di atas kertas dan amplop */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    border: 1px solid #282828;
+    transition: all 0.5s ease;
+    opacity: 0; visibility: hidden; /* Sembunyi dulu, muncul saat amplop dibuka */
+}
+
+/* Muncul setelah amplop sukses dibuka */
+.spotify-widget.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.spotify-album-art {
+    width: 45px;
+    height: 45px;
+    background-color: #282828;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4em;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.spotify-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.spotify-title {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95em;
+    letter-spacing: -0.2px;
+    margin: 0;
+}
+
+.spotify-artist {
+    color: #b3b3b3;
+    font-weight: 600;
+    font-size: 0.8em;
+    margin: 2px 0 0 0;
+}
+
+/* ANIMASI EQUALIZER SPOTIFY */
+.spotify-equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    width: 16px;
+    height: 15px;
+    margin-left: 10px;
+}
+
+.spotify-equalizer .bar {
+    width: 3px;
+    height: 100%;
+    background-color: #1DB954; /* Hijau Spotify */
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: bounceSpotify 0.6s ease-in-out infinite alternate;
+    animation-play-state: paused; /* Berhenti secara default */
+}
+
+/* Berjalan hanya saat lagu playing */
+.spotify-widget.playing .spotify-equalizer .bar {
+    animation-play-state: running;
+}
+
+.spotify-equalizer .bar:nth-child(2) { animation-delay: 0.2s; animation-duration: 0.4s; }
+.spotify-equalizer .bar:nth-child(3) { animation-delay: 0.4s; animation-duration: 0.7s; }
+
+@keyframes bounceSpotify {
+    0% { transform: scaleY(0.2); }
+    100% { transform: scaleY(1); }
+}
+
+/* Responsif Mobile */
+@media (max-width: 600px) {
+    .page { padding: 30px 20px; }
+    h1 { font-size: 1.6em; } 
+    p { font-size: 1em; }
+    .love-btn { width: 45px; height: 45px; font-size: 1.3em; top: 10px; right: 10px; }
+
+    /* Tombol Navigasi Versi HP (Sangat Mini) */
+    button.nav-btn { 
+        font-size: 0.85em; 
+        padding: 5px 10px; 
+    }
+    .controls {
+        padding: 0 10px;
+        bottom: 8px;
+    }
+
+    /* Penyesuaian Widget Spotify di HP agar tidak menutupi tombol Back (⬅️) */
+    .spotify-widget {
+        bottom: 55px; /* Dinaikkan ke atas tombol navigasi */
+        left: 10px;
+        padding: 6px 10px;
+        max-width: 180px; /* Membatasi lebar agar hemat tempat */
+    }
+    .spotify-album-art { width: 32px; height: 32px; font-size: 1em; }
+    .spotify-title { font-size: 0.75em; }
+    .spotify-artist { font-size: 0.65em; }
+    .spotify-equalizer { display: none; } /* Sembunyikan equalizer di HP agar menghemat ruang teks */
+}
+        </style>
+</head>
+<body>
+    <audio id="bgMusic" loop>
+        <source src="Kina - get you the moon (Lyrics) ft. Snow.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="flipSound">
+        <source src="suara-lucu.mp3" type="audio/mpeg">
+    </audio>
+    <button class="love-btn" onclick="burstHearts()">❤️</button>
+    
+    <div id="heart-container"></div>
+
+    <div class="envelope-container" id="envelope-container">
+        <img id="push-bear" src="https://media.tenor.com/1-jF1oRzR9cAAAAi/peach-cat-bear.gif" alt="Cute Bear Pushing">
+        
+        <div class="envelope" id="envelope">
+            <div class="envelope-paper">For You</div>
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-seal" onclick="openEnvelope()">Open</div>
+        </div>
+    </div>
+
+    <div id="airplane">✈️</div>
+    <img id="peek-bear" src="https://media.tenor.com/T0b3AEvnUe8AAAAi/milk-and-mocha-bear-cute.gif" alt="Peek Bear">
+<div class="spotify-widget" id="spotifyWidget">
+    <div class="spotify-album-art">
+        🎵 </div>
+    <div class="spotify-info">
+        <p class="spotify-title">get you the moon</p>
+        <p class="spotify-artist">Kina ft. Snow</p>
+    </div>
+    <div class="spotify-equalizer">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+</div>
+    <div class="book-wrapper" id="book-wrapper">
+
+        <div class="page active" id="page-1">
+            <div class="tape"></div>
+            <div class="scribble" style="top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 30% 70% 50% 50%;"></div>
+            <h1>To The One Who Holds My Heart</h1>
+            <p>Hello my love 🥰, Kak Madun/Wahidku tersayang xixi<3 I am writing this letter to you because sometimes, when I look into your eyes, all my words just vanish. Rasanya kayak bumi berhenti berputar sejenak, dan aku always terpukau sama look kamu yang ganteng, suara kamu yang sleepcall-able itu, cara kamu bikin aku bahagia (hmm tipe aku bgt hehehehehe). I wanted to put these feelings into something tangible, sesuatu yang bisa kamu baca kapan pun kamu merasa ragu. This letter is a piece of my soul, poured out exclusively for you.</p>
+            <div class="polaroid" style="transform: rotate(-6deg); margin-top: 50px;">
+                <div class="polaroid-tape"></div>
+                <img src="kakakk.jpg" alt="kakakk">
+                <p>Cowo ganteng</p>
+                <p>kesayangan aku 🤍</p>
+            </div>
+            <div class="polaroid" style="transform: rotate(-6deg); margin-top: 35px;">
+                <div class="polaroid-tape"></div>
+                <img src="webcam-toy-photo8.jpg" alt="webcam-toy-photo8">
+                <p>And it's me, ur best baddie gf 🔥😜 </p>
+            </div>
+        </div> 
+
+        <div class="page" id="page-2">
+            <div class="tape"></div>
+            <h1>The First Chapter</h1>
+            <p>Do you remember the very first time our paths crossed? Waktu itu sampai saat ini pun, aku sama sekali ga nyangka dan masih sampai sekarang. Random person yang aku temuin di atas robot ff waktu itu, tiba-tiba sekarang jadi orang yang paling berharga in my entire life. It felt like an ordinary day, but looking back, it was the day the universe decided to be incredibly kind to me. You walked into my life so effortlessly, membawa kehangatan yang mencairkan dinding pertahananku (yang mungkin kamu inget, cipa yang anti pacaran sama telpon mwehheheheh:3). From that day on, I knew my life would never be the same again.</p>
+            <div class="polaroid">
+                <div class="polaroid-tape"></div>
+                <img src="mwah.jpeg" alt="mwah">
+                <p style="text-align: center; margin-top: 15px; font-weight: 700; font-size: 1em; color: #4a3c31; border: none;">Frozen in time. Aku sayang kamu 🫣(walaupun fotonya bukan yang awal sik hheeheheheh:>)</p>
+            </div>
+        </div> 
+
+        <div class="page" id="page-3">
+            <div class="tape"></div>
+            <div class="scribble" style="bottom: 30px; left: 30px; width: 60px; height: 20px; border-radius: 50%;"></div>
+            <h1>Falling Deeper</h1>
+            <p>As time went by, my affection for you grew into something I can barely comprehend. Hari demi hari kita lewati, penuh tangis tawa, percakapan panjang, dan keheningan yang nyaman. I realized I was falling for you deeply and irreversibly. Aku jatuh cinta pada cara kamu melihat dunia, dan pada kebaikan hati kamu yang tulus. You are a masterpiece, and every single day, I discover a new detail to adore about you.</p>
+            <img src="funny sticker _ me fr__.webp" alt="funny sticker _ me fr__" width="300" height="200">
+            <img src="kisssed.jpg" alt="kisssed" width="400" height="200">
+            <p>All my loOve and my kisSes for yOu:3</p>
+        </div>
+
+        <div class="page" id="page-4">
+            <div class="tape"></div>
+            <h1>Our Beautiful Moment</h1>
+            <p>Whenever I miss you, I always find myself looking at our memories. Liat ini sayangg, ini barang kesayangan aku, yang sering aku pakai semenjak hubungan kita berjalan.</p>
+            <div class="polaroid">
+                <div class="polaroid-tape"></div>
+                <img src="fav.jpeg" alt="fav">
+                <p style="text-align: center; margin-top: 15px; font-weight: 700; font-size: 1em; color: #4a3c31; border: none;">Thanks a lot, sayang :/ </p>
+            </div>
+        </div>
+
+        <div class="page" id="page-5">
+            <div class="tape"></div>
+            <h1>Your Beautiful Flaws</h1>
+            <p>I don't just love your perfections; I love your flaws even more. Banyak orang mencari kesempurnaan, tapi bagiku, ketidaksempurnaanmu itulah yang membuatmu menjadi manusia yang paling nyata dan indah. The way you get confused, cara kamu ngejek aku dan bikin aku ketawa, and your stubborn habits—they all make you uniquely you. I love you not despite your imperfections, but because of them. You don't have to pretend to be strong all the time around me.</p>
+             <div class="polaroid" style="transform: rotate(-2deg); margin-top: 30px;">
+                <div class="polaroid-tape"></div>
+                <img src="sayang.jpeg" alt="sayang">
+                <p>It's always u, sayang 🤍</p>
+            </div>
+        </div>
+
+        <div class="page" id="page-6">
+            <div class="tape"></div>
+            <h1>Through The Storms</h1>
+            <p>We have faced our fair share of storms, haven't we? Tidak semua hari yang kita lalui itu cerah. Ada kalanya kita salah paham, ada ego yang bertabrakan. But what makes us special is that we never let go. Kita memilih untuk tetap tinggal, berbicara, dan memperbaiki. The hard times only proved to me that you are worth fighting for. Every argument we survive only makes the roots of our relationship grow deeper.</p>
+            <img src="eum.webp" alt="eum" width="200" height="150">
+        </div>
+
+        <div class="page" id="page-7">
+            <div class="tape"></div>
+            <div class="scribble" style="top: 50%; right: 20px; width: 40px; height: 80px; border-radius: 20px;"></div>
+            <h1>My Safe Haven</h1>
+            <p>You are the definition of home to me. Saat dunia di luar sana terasa terlalu keras, bising, dan melelahkan, kamu adalah tempat pulang yang paling kunanti. Just hearing your voice has this magical ability to calm the chaos in my mind. Di pelukanmu, aku menemukan kedamaian. You are my safe haven, my peace, and my greatest comfort. Your presence alone is enough to heal my exhausted soul.</p>
+        </div>
+
+        <div class="page" id="page-8">
+            <div class="tape"></div>
+            <h1>My Vows to You</h1>
+            <p>Through this letter, I want to make a promise to you. Aku berjanji untuk selalu berusaha menjadi pendengar yang baik untuk setiap ceritamu, entah itu hal yang penting maupun yang sepele. I promise to support your dreams and be your loudest cheerleader. Aku akan berada di barisan terdepan saat kamu berhasil, dan yang pertama menggenggam tanganmu saat kamu gagal. I will choose you today, tomorrow, and always.</p>
+            <img src="woww.webp" alt="wow" width="350" height="400">
+        </div>
+
+        <div class="page" id="page-9">
+            <div class="tape"></div>
+            <h1>Looking Forward</h1>
+            <p>I can't wait to see what the future holds for us. Membayangkan hari tua di mana kita duduk berdampingan, menertawakan masa lalu, adalah hal yang membuatku tersenyum. There are still so many places we need to visit, and memories we need to create. I am excited to write the next chapters of my life, as long as you are the main character right beside me.</p>
+            <img src="download.webp" alt="wow" width="150" height="200">
+            <img src="download (1).webp" alt="wow" width="350" height="400">
+        </div>
+
+        <div class="page" id="page-10">
+            <div class="tape"></div>
+            <h1>Endlessly Yours</h1>
+            <p>We have reached the end of this letter, but my love for you is endless. Terima kasih sudah mengizinkanku mencintaimu dengan cara yang luar biasa. You are the best thing that has ever happened to me. Tolong simpan surat ini, and whenever the world gets too dark, read this and remember that someone out there loves you more than words could ever describe.</p>
+            <img src="yay.webp" alt="yay" width="350" height="400">
+            <br>
+            <p style="text-align: right; font-weight: 700; border-top: 3px solid #4f3b2b; display: inline-block; float: right; padding-top: 10px;">
+                With all my heart,<br>Yours (Syifa Cantik💌).
+            </p>
+        </div>
+
+        <div class="controls">
+     <button class="nav-btn" id="prevBtn" onclick="changePage(-1)" disabled>⬅️ 💌</button>
+            <button class="nav-btn" id="nextBtn" onclick="changePage(1)">💌 ➡️</button>
+        </div> 
+    </div>
+
+    <script>
+        // ISI DI BAGIAN PALING ATAS TAG <SCRIPT>
+        const bgMusic = document.getElementById('bgMusic');
+        const flipSound = document.getElementById('flipSound');
+        const envelope = document.getElementById('envelope');
+        const pushBear = document.getElementById('push-bear');
+        const envelopeContainer = document.getElementById('envelope-container');
+        const bookWrapper = document.getElementById('book-wrapper');
+        const peekBear = document.getElementById('peek-bear');
+        const airplane = document.getElementById('airplane');
+
+// FUNGSI MEMBUKA AMPLOP & BERUANG MENDORONG (UPDATE VERSION)
+function openEnvelope() {
+    const spotifyWidget = document.getElementById('spotifyWidget');
+
+    // 1. Putar Musik & Buka Flap
+    bgMusic.volume = 0.5;
+    bgMusic.play().then(() => {
+        // Jika musik berhasil berputar, aktifkan animasi equalizer Spotify
+        spotifyWidget.classList.add('playing');
+    }).catch(e => console.log("Audio diblokir browser, interaksi lebih lanjut diperlukan."));
+    
+    envelope.classList.add('open');
+
+    // 2. Beruang Muncul dan Mendorong (setelah flap terbuka)
+    setTimeout(() => {
+        pushBear.classList.add('pushing');
+        burstHearts(); 
+
+        // 3. Amplop terdorong setelah tersentuh beruang
+        setTimeout(() => {
+            envelope.classList.add('pushed-away');
+        }, 800); 
+
+        // 4. Transisi ke halaman utama surat & Munculkan Widget Spotify
+        setTimeout(() => {
+            envelopeContainer.classList.add('hidden');
+            bookWrapper.classList.add('visible');
+            
+            // Memunculkan widget Spotify secara halus (fade-in)
+            spotifyWidget.classList.add('show'); 
+            
+            burstHearts(); 
+        }, 2000); 
+
+    }, 1000);
+}
+        // FUNGSI LOVE BANYAK (PARTICLES)
+        function burstHearts() {
+            const container = document.getElementById('heart-container');
+            const heartCount = 35; // Hujan love tetap banyak
+            
+            for (let i = 0; i < heartCount; i++) {
+                let heart = document.createElement('div');
+                heart.innerHTML = ['❤️', '💖', '💘', '✨'][Math.floor(Math.random() * 4)];
+                heart.classList.add('floating-heart');
+                
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                heart.style.animationDelay = (Math.random() * 0.5) + 's';
+                
+                container.appendChild(heart);
+                setTimeout(() => { heart.remove(); }, 3000);
+            }
+        }
+
+        // NAVIGASI HALAMAN + ANIMASI KOMBINASI
+        let currentPage = 1;
+        const totalPages = 10;
+
+        function changePage(direction) {
+            // Putar Sound Effect lucu
+            flipSound.currentTime = 0; 
+            flipSound.play().catch(() => {});
+
+            // Animasi Pesawat
+            airplane.classList.remove('fly-animation');
+            void airplane.offsetWidth; 
+            airplane.classList.add('fly-animation');
+
+            // Beruang Ngintip (Kombinasi Animasi)
+            peekBear.classList.add('show');
+            setTimeout(() => { peekBear.classList.remove('show'); }, 1500);
+
+            // Love Sedikit saat pindah halaman
+            burstHearts();
+
+            // Ganti Kelas Active Halaman
+            document.getElementById(`page-${currentPage}`).classList.remove('active');
+            currentPage += direction;
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+            
+            // Cek Status Tombol
+            document.getElementById('prevBtn').disabled = (currentPage === 1);
+            document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+        }
+    </script>
+</body>
+</html>
